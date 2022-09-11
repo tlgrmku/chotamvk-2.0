@@ -108,10 +108,12 @@ def ask_vk():
             readtime = rfiledate()
             for s in range(len(r['items'])):
                 if r['items'][s]['marked_as_ads'] == 1: #проверка рекламного поста
+                    log.info('Пост с пометкой реклама')
                     pass
                 else:
                     try:
                         if r['items'][s]['copy_history']: #проверка на репост
+                            log.info('Репост')
                             pass
                     except:
                         postdate = r['items'][s]['date'] #время появления поста в unix. int
@@ -190,6 +192,7 @@ def ask_vk():
             else:
                 pass
         else:
+            log.info('Пустой запрос')
             pass
 
 
