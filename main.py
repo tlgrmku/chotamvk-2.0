@@ -99,7 +99,7 @@ def ask_vk():
     try:
         r = requests.get(URL).json()['response']
     except requests.ConnectionError as e:
-        logging.exception(e)
+        log.exception(e)
     else:
         if r['items'] != []:
             groupsid = {}
