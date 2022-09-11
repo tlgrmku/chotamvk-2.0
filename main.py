@@ -17,6 +17,7 @@ token= config.token
 DATESAVE = config.DATESAVE
 LOGF = config.LOGF
 errorphoto = config.errorphoto
+ignore_words = config.ignore_words
 URL = f'https://api.vk.com/method/newsfeed.get?filters=post&count={countpost}&access_token={token}&v=5.131'
 FORMAT = '%(asctime)s %(levelname)s %(message)s'
 logging.basicConfig(level=logging.INFO, filename=LOGF, format=FORMAT)
@@ -32,22 +33,46 @@ class PostObj: #объект поста из вк
         self.attachdata = attachdata #прикреплённые файлы поста
 
 
+    def censor(self): #игнорирование постов по ключевым словам
+        w = 0
+        for word in ignore_words:
+            if word.lower() in self.posttext.lower():
+                w += 1
+                log.info(f'Обнаружено стоп слово: {word}')
+        if w > 0:
+            return False
+        else:
+            return True
+
+
     def send_text_tg(self): #отправка объекта только с текстом в телеграм
-        with app:
-            app.send_message(tgchatid, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-        time.sleep(5) #задержка что бы телеграм не ругался:)
+        if PostObj.censor(self):
+            log.info('Пост с текстом отправлен в telegram')
+            with app:
+                app.send_message(tgchatid, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
+            time.sleep(5) #задержка что бы телеграм не ругался:)
+        else:
+            log.info('Пост не прошёл цензуру.')
 
 
     def send_text_photo_tg(self): #отправка объекта с текстом и фото в телеграм
-        with app:
-            app.send_photo(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-        time.sleep(5) #задержка что бы телеграм не ругался:)
+        if PostObj.censor(self):
+            log.info('Пост с текстом и фото отправлен в telegram')
+            with app:
+                app.send_photo(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
+            time.sleep(5) #задержка что бы телеграм не ругался:)
+        else:
+            log.info('Пост не прошёл цензуру.')
 
 
     def send_text_anim_tg(self): #отправка объекта с текстом и анимацией в телеграм
-        with app:
-            app.send_animation(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-        time.sleep(5) #задержка что бы телеграм не ругался:)
+        if PostObj.censor(self):
+            log.info('Пост с текстом и анимацией отправлен в telegram')
+            with app:
+                app.send_animation(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
+            time.sleep(5) #задержка что бы телеграм не ругался:)
+        else:
+            log.info('Пост не прошёл цензуру.')
 
 
 def rfiledate(): #чтение файла с датой последнего поста
@@ -166,6 +191,7 @@ def ask_vk():
                 pass
         else:
             pass
+
 
 def main():
     while True:
