@@ -38,7 +38,7 @@ class PostObj: #объект поста из вк
         for word in ignore_words:
             if word.lower() in self.posttext.lower():
                 w += 1
-                log.info(f'Обнаружено стоп слово: {word}')
+                log.info(f'*** Обнаружено стоп слово: {word}')
         if w > 0:
             return False
         else:
@@ -47,32 +47,32 @@ class PostObj: #объект поста из вк
 
     def send_text_tg(self): #отправка объекта только с текстом в телеграм
         if PostObj.censor(self):
-            log.info('Пост с текстом отправлен в telegram')
+            log.info('*** Пост с текстом отправлен в telegram')
             with app:
                 app.send_message(tgchatid, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
             time.sleep(5) #задержка что бы телеграм не ругался:)
         else:
-            log.info('Пост не прошёл цензуру.')
+            log.info('*** Пост не прошёл цензуру.')
 
 
     def send_text_photo_tg(self): #отправка объекта с текстом и фото в телеграм
         if PostObj.censor(self):
-            log.info('Пост с текстом и фото отправлен в telegram')
+            log.info('*** Пост с текстом и фото отправлен в telegram')
             with app:
                 app.send_photo(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
             time.sleep(5) #задержка что бы телеграм не ругался:)
         else:
-            log.info('Пост не прошёл цензуру.')
+            log.info('*** Пост не прошёл цензуру.')
 
 
     def send_text_anim_tg(self): #отправка объекта с текстом и анимацией в телеграм
         if PostObj.censor(self):
-            log.info('Пост с текстом и анимацией отправлен в telegram')
+            log.info('*** Пост с текстом и анимацией отправлен в telegram')
             with app:
                 app.send_animation(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
             time.sleep(5) #задержка что бы телеграм не ругался:)
         else:
-            log.info('Пост не прошёл цензуру.')
+            log.info('*** Пост не прошёл цензуру.')
 
 
 def rfiledate(): #чтение файла с датой последнего поста
@@ -108,12 +108,10 @@ def ask_vk():
             readtime = rfiledate()
             for s in range(len(r['items'])):
                 if r['items'][s]['marked_as_ads'] == 1: #проверка рекламного поста
-                    log.info('Пост с пометкой реклама')
                     pass
                 else:
                     try:
                         if r['items'][s]['copy_history']: #проверка на репост
-                            log.info('Репост')
                             pass
                     except:
                         postdate = r['items'][s]['date'] #время появления поста в unix. int
@@ -192,7 +190,6 @@ def ask_vk():
             else:
                 pass
         else:
-            log.info('Пустой запрос')
             pass
 
 
