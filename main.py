@@ -12,6 +12,7 @@ import logging
 timeout = config.timeout
 countpost = config.countpost
 tgchatid = config.tgchatid
+adminchat = config.adminchat
 nameclient = config.nameclient
 token= config.token
 DATESAVE = config.DATESAVE
@@ -53,6 +54,9 @@ class PostObj: #объект поста из вк
             time.sleep(5) #задержка что бы телеграм не ругался:)
         else:
             log.info('*** Пост не прошёл цензуру.')
+            with app:
+                app.send_message(adminchat, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
+            time.sleep(5) #задержка что бы телеграм не ругался:)
 
 
     def send_text_photo_tg(self): #отправка объекта с текстом и фото в телеграм
@@ -63,6 +67,9 @@ class PostObj: #объект поста из вк
             time.sleep(5) #задержка что бы телеграм не ругался:)
         else:
             log.info('*** Пост не прошёл цензуру.')
+            with app:
+                app.send_photo(adminchat, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
+            time.sleep(5) #задержка что бы телеграм не ругался:)
 
 
     def send_text_anim_tg(self): #отправка объекта с текстом и анимацией в телеграм
@@ -73,6 +80,9 @@ class PostObj: #объект поста из вк
             time.sleep(5) #задержка что бы телеграм не ругался:)
         else:
             log.info('*** Пост не прошёл цензуру.')
+            with app:
+                app.send_animation(adminchat, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
+            time.sleep(5) #задержка что бы телеграм не ругался:)
 
 
 def rfiledate(): #чтение файла с датой последнего поста
