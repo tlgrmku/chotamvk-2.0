@@ -39,6 +39,7 @@ class PostObj: #объект поста из вк
         for word in ignore_words:
             if word.lower() in self.posttext.lower():
                 w += 1
+                self.posttext = self.posttext + '\n<s>' + word + '</s>'
                 log.info(f'*** Обнаружено стоп слово: {word}')
         if w > 0:
             return False
