@@ -20,8 +20,8 @@ LOGF = config.LOGF
 errorphoto = config.errorphoto
 ignore_words = config.ignore_words
 URL = f'https://api.vk.com/method/newsfeed.get?filters=post&count={countpost}&access_token={token}&v=5.131'
-FORMAT = '%(asctime)s %(levelname)s %(message)s'
-logging.basicConfig(level=logging.INFO, filename=LOGF, format=FORMAT)
+FORMAT = '%(asctime)s : %(message)s'
+logging.basicConfig(level=logging.WARNING, filename=LOGF, format=FORMAT)
 
 log = logging.getLogger()
 app = Client(nameclient)
@@ -40,50 +40,44 @@ class PostObj: #объект поста из вк
             if word.lower() in self.posttext.lower():
                 w += 1
                 self.posttext = self.posttext + '\n<s>' + word + '</s>'
-                log.info(f'*** Обнаружено стоп слово: {word}')
+                log.log(31, f'Обнаружено стоп слово: {word}')
         if w > 0:
             return False
         else:
             return True
 
 
-    def send_text_tg(self): #отправка объекта только с текстом в телеграм
+    async def send_text_tg(self): #отправка объекта только с текстом в телеграм
         if PostObj.censor(self):
-            log.info('*** Пост с текстом отправлен в telegram')
-            with app:
-                app.send_message(tgchatid, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-            time.sleep(5) #задержка что бы телеграм не ругался:)
+            log.log(31, 'Пост с текстом отправлен в telegram')
+            async with app:
+                await app.send_message(tgchatid, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
         else:
-            log.info('*** Пост не прошёл цензуру.')
-            with app:
-                app.send_message(adminchat, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-            time.sleep(5) #задержка что бы телеграм не ругался:)
+            log.log(31, 'Пост не прошёл цензуру.')
+            async with app:
+                await app.send_message(adminchat, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
 
 
-    def send_text_photo_tg(self): #отправка объекта с текстом и фото в телеграм
+    async def send_text_photo_tg(self): #отправка объекта с текстом и фото в телеграм
         if PostObj.censor(self):
-            log.info('*** Пост с текстом и фото отправлен в telegram')
-            with app:
-                app.send_photo(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-            time.sleep(5) #задержка что бы телеграм не ругался:)
+            log.log(31, 'Пост с текстом и фото отправлен в telegram')
+            async with app:
+                await app.send_photo(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
         else:
-            log.info('*** Пост не прошёл цензуру.')
-            with app:
-                app.send_photo(adminchat, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-            time.sleep(5) #задержка что бы телеграм не ругался:)
+            log.log(31, 'Пост не прошёл цензуру.')
+            async with app:
+                await app.send_photo(adminchat, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
 
 
-    def send_text_anim_tg(self): #отправка объекта с текстом и анимацией в телеграм
+    async def send_text_anim_tg(self): #отправка объекта с текстом и анимацией в телеграм
         if PostObj.censor(self):
-            log.info('*** Пост с текстом и анимацией отправлен в telegram')
-            with app:
-                app.send_animation(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-            time.sleep(5) #задержка что бы телеграм не ругался:)
+            log.log(31, 'Пост с текстом и анимацией отправлен в telegram')
+            async with app:
+                await app.send_animation(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
         else:
-            log.info('*** Пост не прошёл цензуру.')
-            with app:
-                app.send_animation(adminchat, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-            time.sleep(5) #задержка что бы телеграм не ругался:)
+            log.log(31, 'Пост не прошёл цензуру.')
+            async with app:
+                await app.send_animation(adminchat, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
 
 
 def rfiledate(): #чтение файла с датой последнего поста
@@ -109,7 +103,7 @@ def crop_text(text): #обрезает длинный текст поста (б�
 def ask_vk():
     try:
         r = requests.get(URL).json()['response']
-    except requests.ConnectionError as e:
+    except requests.exceptions.RequestException as e:
         log.exception(e)
     else:
         if r['items'] != []:
@@ -132,11 +126,10 @@ def ask_vk():
                             posttext = sourcename + '\n' + crop_text(r['items'][s]['text']) #текст поста. str
                             postid = r['items'][s]['post_id'] #id поста. int
                             urlbutton = f'https://vk.com/feed?w=wall{sourceid}_{postid}' #ссылка на пост вк для кнопки. str
-                            try:
-                                attach = r['items'][s]['attachments'] #прикреплённые данные
-                            except:
+                            attach = r['items'][s]['attachments'] #прикреплённые данные
+                            if attach == []:
                                 postobj = PostObj(posttext, urlbutton)
-                                postobj.send_text_tg()
+                                app.run(postobj.send_text_tg())
                             else:
                                 if attach[0]['type'] == 'photo': #если тип фото
                                     urlphoto = ''
@@ -153,49 +146,50 @@ def ask_vk():
                                         else:
                                             urlphoto = errorphoto
                                     postobj = PostObj(posttext, urlbutton, urlphoto)
-                                    postobj.send_text_photo_tg()
+                                    app.run(postobj.send_text_photo_tg())
                                 elif attach[0]['type'] == 'video': #если тип видео
                                     idvideo = attach[0]['video']['id']
                                     ownervideo = attach[0]['video']['owner_id']
                                     posttext = f'{posttext}\nhttps://vk.com/video{ownervideo}_{idvideo}'
                                     postobj = PostObj(posttext, urlbutton) #объект поста с текстом и ссылкой на видео
-                                    postobj.send_text_tg() #объект поста отправляется в телеграм
+                                    app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 elif attach[0]['type'] == 'link': #если тип ссылка
                                     urllink = attach[0]['link']['url']
                                     posttext = re.sub(r'http\S+', '', posttext)
                                     posttext = f'{posttext}\n{urllink}'
                                     postobj = PostObj(posttext, urlbutton) #объект поста с текстом и ссылкой
-                                    postobj.send_text_tg() #объект поста отправляется в телеграм
+                                    app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 elif attach[0]['type'] == 'audio': #если тип аудио
                                     posttext = f'{posttext}\n<i>Есть наличие аудиофайлов</i>'
                                     postobj = PostObj(posttext, urlbutton) #объект поста с текстом и аудио
-                                    postobj.send_text_tg() #объект поста отправляется в телеграм
+                                    app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 elif attach[0]['type'] == 'poll': #если тип опрос
                                     question = attach[0]['poll']['question']
                                     posttext = f'{posttext}\n<i>К посту прикреплён опрос:</i>\n{question}'
                                     postobj = PostObj(posttext, urlbutton) #объект поста с текстом и опросом
-                                    postobj.send_text_tg() #объект поста отправляется в телеграм
+                                    app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 elif attach[0]['type'] == 'doc': #если тип файл
                                     exttype = attach[0]['doc']['ext']
                                     urldoc = attach[0]['doc']['url']
                                     if exttype == 'jpg':
                                         postobj = PostObj(posttext, urlbutton, urldoc) #объект поста с текстом и фото
-                                        postobj.send_text_photo_tg() #объект поста отправляется в телеграм
+                                        app.run(postobj.send_text_photo_tg()) #объект поста отправляется в телеграм
                                     elif exttype == 'gif':
                                         postobj = PostObj(posttext, urlbutton, urldoc) #объект поста с текстом и гифкой
-                                        postobj.send_text_anim_tg() #объект поста отправляется в телеграм
+                                        app.run(postobj.send_text_anim_tg()) #объект поста отправляется в телеграм
                                     elif exttype == 'doc':
                                         posttext = f'{posttext}\n{urldoc}'
                                         postobj = PostObj(posttext, urlbutton) #объект поста с текстом и документом
-                                        postobj.send_text_tg() #объект поста отправляется в телеграм
+                                        app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                     else:
                                         postobj = PostObj(posttext, urlbutton) #объект поста с текстом и документом
-                                        postobj.send_text_tg() #объект поста отправляется в телеграм
+                                        app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 else:
                                     postobj = PostObj(posttext, urlbutton) #объект поста с текстом и документом
-                                    postobj.send_text_tg() #объект поста отправляется в телеграм
+                                    app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                         else:
                             pass
+
             if r['items'][0]['date'] > readtime:
                 wfiledate(r['items'][0]['date']) #записываем время свежего поста в datesave файл
             else:
