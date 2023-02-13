@@ -24,6 +24,15 @@ FORMAT = '%(asctime)s : %(message)s'
 logging.basicConfig(level=logging.WARNING, filename=LOGF, format=FORMAT)
 
 log = logging.getLogger()
+'''
+#Раскоментировать при первом запуске со своими api_id, api_hash и токеном бота и закоментировать после
+api_id = 12345
+api_hash = "0123456789abcdef0123456789abcdef"
+bot_token = "123456:ABc-DEF1234ghIkl-zyx57W2v1u123ew11"
+
+app = Client(nameclient, api_id=api_id, api_hash=api_hash, bot_token=bot_token)
+#Закоментировать строку ниже и раскоментировать после авторизации
+'''
 app = Client(nameclient)
 
 
