@@ -1,7 +1,9 @@
 # Обновлённый бот Telegram-канала "Чо там Вконтакте?"
 
 ## Бот копирует посты из новостной ленты аккаунта Вконтакте и размещает их в Telegram канале/группе/в личных сообщениях.
-
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyrogram)](https://www.python.org/)
+[![Perogram](https://img.shields.io/badge/Pyrogram-2.0-orange)](https://docs.pyrogram.org/)
+![GitHub repo size](https://img.shields.io/github/repo-size/tlgrmku/chotamvk-2.0)
 ### О боте:
  - Весь код написан на Python 3.8.10
  - Используемые методы vk api: newsfeed.get.
