@@ -24,90 +24,82 @@ FORMAT = '%(asctime)s : %(message)s'
 logging.basicConfig(level=logging.WARNING, filename=LOGF, format=FORMAT)
 
 log = logging.getLogger()
-'''
-#Раскоментировать при первом запуске со своими api_id, api_hash и токеном бота и закоментировать после
-api_id = 12345
-api_hash = "0123456789abcdef0123456789abcdef"
-bot_token = "123456:ABc-DEF1234ghIkl-zyx57W2v1u123ew11"
 
-app = Client(nameclient, api_id=api_id, api_hash=api_hash, bot_token=bot_token)
-#Закоментировать строку ниже и раскоментировать после авторизации
-'''
+#Строки api_id, api_hash, bot_token, app=... нужны для первого запуска бота. Затем эти строки можно удалить.
+#api_id = 12345
+#api_hash = "0123456789abcdef0123456789abcdef"
+#bot_token = "123456:ABc-DEF1234ghIkl-zyx57W2v1u123ew11"
+#app = Client(nameclient, api_id=api_id, api_hash=api_hash, bot_token=bot_token)
+
+#После удаления раскоментировать строку ниже.
 app = Client(nameclient)
 
 
 class PostObj: #объект поста из вк
     def __init__(self, posttext, urlbutton, attachdata=''):
-        self.posttext = posttext #текст поста с названием группы
-        self.urlbutton = urlbutton #ссылка на пост вк для кнопки
-        self.attachdata = attachdata #прикреплённые файлы поста
-
+        self.posttext = posttext
+        self.urlbutton = urlbutton
+        self.attachdata = attachdata
 
     def censor(self): #игнорирование постов по ключевым словам
-        w = 0
+        censorword = 0
         for word in ignore_words:
             if word.lower() in self.posttext.lower():
-                w += 1
+                censorword += 1
                 self.posttext = self.posttext + '\n<s>' + word + '</s>'
                 log.log(31, f'Обнаружено стоп слово: {word}')
-        if w > 0:
+        if censorword > 0:
             return False
         else:
             return True
 
-
     async def send_text_tg(self): #отправка объекта только с текстом в телеграм
         if PostObj.censor(self):
             log.log(31, 'Пост с текстом отправлен в telegram')
-            async with app:
-                await app.send_message(tgchatid, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
+            uid = tgchatid
         else:
             log.log(31, 'Пост не прошёл цензуру.')
-            async with app:
-                await app.send_message(adminchat, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-
+            uid = adminchat
+        async with app:
+            await app.send_message(uid, self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
 
     async def send_text_photo_tg(self): #отправка объекта с текстом и фото в телеграм
         if PostObj.censor(self):
             log.log(31, 'Пост с текстом и фото отправлен в telegram')
-            async with app:
-                await app.send_photo(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
+            uid = tgchatid
         else:
             log.log(31, 'Пост не прошёл цензуру.')
-            async with app:
-                await app.send_photo(adminchat, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
-
+            uid = adminchat
+        async with app:
+            await app.send_photo(uid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
 
     async def send_text_anim_tg(self): #отправка объекта с текстом и анимацией в телеграм
         if PostObj.censor(self):
             log.log(31, 'Пост с текстом и анимацией отправлен в telegram')
-            async with app:
-                await app.send_animation(tgchatid, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
+            uid = tgchatid
         else:
             log.log(31, 'Пост не прошёл цензуру.')
-            async with app:
-                await app.send_animation(adminchat, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
+            uid = adminchat
+        async with app:
+            await app.send_animation(adminchat, self.attachdata, caption=self.posttext, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ссылка на пост', url=self.urlbutton)]]))
 
 
-def rfiledate(): #чтение файла с датой последнего поста
+def readfiledate(): #чтение файла с датой последнего поста
     if os.path.isfile(DATESAVE):
         with open(DATESAVE, 'r', encoding='UTF-8') as f:
             return int(f.read())
     else:
         return int(time.time() - timeout)
 
-
-def wfiledate(date): #запись файла с датой последнего поста
+def writefiledate(date): #запись файла с датой последнего поста
     with open(DATESAVE, 'w', encoding='UTF-8') as f:
             f.write(str(date + 1))
-
 
 def crop_text(text): #обрезает длинный текст поста (более 800 символов)
     if len(text) > 800:
         return text[0:800] + '...'
     else:
         return text
-
 
 def ask_vk():
     try:
@@ -119,7 +111,7 @@ def ask_vk():
             groupsid = {}
             for g in range(len(r['groups'])): #получение имени группы
                 groupsid[r['groups'][g]['id']] = r['groups'][g]['name']
-            readtime = rfiledate()
+            readtime = readfiledate()
             for s in range(len(r['items'])):
                 if r['items'][s]['marked_as_ads'] == 1: #проверка рекламного поста
                     pass
@@ -200,21 +192,22 @@ def ask_vk():
                             pass
 
             if r['items'][0]['date'] > readtime:
-                wfiledate(r['items'][0]['date']) #записываем время свежего поста в datesave файл
+                writefiledate(r['items'][0]['date']) #записываем время свежего поста в datesave файл
             else:
                 pass
         else:
+            log.log(31, 'Пришёл пустой запрос от Вконтакте.')
             pass
 
-
 def main():
+    log.log(31, '***Запуск бота***')
     while True:
         ask_vk()
         try:
             time.sleep(timeout)
         except KeyboardInterrupt:
+            log.log(31, '***Остановка бота***')
             break
-
 
 if __name__ == '__main__':
     main()
