@@ -125,6 +125,7 @@ def ask_vk():
                             attach = r['items'][s]['attachments'] #прикреплённые данные
                             if attach == []:
                                 postobj = PostObj(posttext, urlbutton)
+                                log.log(31, 'Сформирован пост с текстом')
                                 app.run(postobj.send_text_tg())
                             else:
                                 if attach[0]['type'] == 'photo': #если тип фото
@@ -186,12 +187,12 @@ def ask_vk():
                                         log.log(31, 'Сформирован пост с текстом и документом.')
                                         app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                     else:
-                                        postobj = PostObj(posttext, urlbutton) #объект поста с текстом и документом
+                                        postobj = PostObj(posttext, urlbutton) #объект поста с текстом и файлом
                                         log.log(31, 'Сформирован пост с текстом и файлом.')
                                         app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 else:
-                                    postobj = PostObj(posttext, urlbutton) #объект поста с текстом и документом
-                                    log.log(31, 'Сформирован пост с текстом.')
+                                    postobj = PostObj(posttext, urlbutton) #объект поста с текстом и другими данными
+                                    log.log(31, 'Сформирован пост с текстом и другими данными.')
                                     app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                         else:
                             pass
