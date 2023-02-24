@@ -55,7 +55,6 @@ class PostObj: #объект поста из вк
 
     async def send_text_tg(self): #отправка объекта только с текстом в телеграм
         if PostObj.censor(self):
-            log.log(31, 'Пост с текстом отправлен в telegram')
             uid = tgchatid
         else:
             log.log(31, 'Пост не прошёл цензуру.')
@@ -65,7 +64,6 @@ class PostObj: #объект поста из вк
 
     async def send_text_photo_tg(self): #отправка объекта с текстом и фото в телеграм
         if PostObj.censor(self):
-            log.log(31, 'Пост с текстом и фото отправлен в telegram')
             uid = tgchatid
         else:
             log.log(31, 'Пост не прошёл цензуру.')
@@ -75,7 +73,6 @@ class PostObj: #объект поста из вк
 
     async def send_text_anim_tg(self): #отправка объекта с текстом и анимацией в телеграм
         if PostObj.censor(self):
-            log.log(31, 'Пост с текстом и анимацией отправлен в telegram')
             uid = tgchatid
         else:
             log.log(31, 'Пост не прошёл цензуру.')
@@ -147,46 +144,56 @@ def ask_vk():
                                         else:
                                             urlphoto = errorphoto
                                     postobj = PostObj(posttext, urlbutton, urlphoto)
+                                    log.log(31, 'Пост с текстом и фотографией отправлен в telegram.')
                                     app.run(postobj.send_text_photo_tg())
                                 elif attach[0]['type'] == 'video': #если тип видео
                                     idvideo = attach[0]['video']['id']
                                     ownervideo = attach[0]['video']['owner_id']
                                     posttext = f'{posttext}\nhttps://vk.com/video{ownervideo}_{idvideo}'
                                     postobj = PostObj(posttext, urlbutton) #объект поста с текстом и ссылкой на видео
+                                    log.log(31, 'Пост с текстом и видео отправлен в telegram.')
                                     app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 elif attach[0]['type'] == 'link': #если тип ссылка
                                     urllink = attach[0]['link']['url']
                                     posttext = re.sub(r'http\S+', '', posttext)
                                     posttext = f'{posttext}\n{urllink}'
                                     postobj = PostObj(posttext, urlbutton) #объект поста с текстом и ссылкой
+                                    log.log(31, 'Пост с текстом и ссылкой отправлен в telegram.')
                                     app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 elif attach[0]['type'] == 'audio': #если тип аудио
                                     posttext = f'{posttext}\n<i>Есть наличие аудиофайлов</i>'
                                     postobj = PostObj(posttext, urlbutton) #объект поста с текстом и аудио
+                                    log.log(31, 'Пост с текстом и аудио отправлен в telegram.')
                                     app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 elif attach[0]['type'] == 'poll': #если тип опрос
                                     question = attach[0]['poll']['question']
                                     posttext = f'{posttext}\n<i>К посту прикреплён опрос:</i>\n{question}'
                                     postobj = PostObj(posttext, urlbutton) #объект поста с текстом и опросом
+                                    log.log(31, 'Пост с текстом и опросом отправлен в telegram.')
                                     app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 elif attach[0]['type'] == 'doc': #если тип файл
                                     exttype = attach[0]['doc']['ext']
                                     urldoc = attach[0]['doc']['url']
                                     if exttype == 'jpg':
                                         postobj = PostObj(posttext, urlbutton, urldoc) #объект поста с текстом и фото
+                                        log.log(31, 'Пост с текстом и фотодокументом отправлен в telegram.')
                                         app.run(postobj.send_text_photo_tg()) #объект поста отправляется в телеграм
                                     elif exttype == 'gif':
                                         postobj = PostObj(posttext, urlbutton, urldoc) #объект поста с текстом и гифкой
+                                        log.log(31, 'Пост с текстом и гифкой отправлен в telegram.')
                                         app.run(postobj.send_text_anim_tg()) #объект поста отправляется в телеграм
                                     elif exttype == 'doc':
                                         posttext = f'{posttext}\n{urldoc}'
                                         postobj = PostObj(posttext, urlbutton) #объект поста с текстом и документом
+                                        log.log(31, 'Пост с текстом и документом отправлен в telegram.')
                                         app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                     else:
                                         postobj = PostObj(posttext, urlbutton) #объект поста с текстом и документом
+                                        log.log(31, 'Пост с текстом и файлом отправлен в telegram.')
                                         app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                 else:
                                     postobj = PostObj(posttext, urlbutton) #объект поста с текстом и документом
+                                    log.log(31, 'Пост с текстом отправлен в telegram.')
                                     app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                         else:
                             pass
