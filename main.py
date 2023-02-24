@@ -125,7 +125,7 @@ def ask_vk():
                             attach = r['items'][s]['attachments'] #прикреплённые данные
                             if attach == []:
                                 postobj = PostObj(posttext, urlbutton)
-                                log.log(31, 'Сформирован пост с текстом')
+                                log.log(31, 'Сформирован пост с текстом.')
                                 app.run(postobj.send_text_tg())
                             else:
                                 if attach[0]['type'] == 'photo': #если тип фото
