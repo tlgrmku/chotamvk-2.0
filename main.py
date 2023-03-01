@@ -104,25 +104,24 @@ def ask_vk():
     else:
         if r['items'] != []:
             groupsid = {}
-            for g in range(len(r['groups'])): #получение имени группы
-                groupsid[r['groups'][g]['id']] = r['groups'][g]['name']
+            for group in range(len(r['groups'])): #получение имени группы
+                groupsid[r['groups'][group]['id']] = r['groups'][group]['name']
             readtime = readfiledate()
-            for s in range(len(r['items'])):
-                if r['items'][s]['marked_as_ads'] == 1: #проверка рекламного поста
+            for count in range(len(r['items'])):
+                if r['items'][count]['marked_as_ads'] == 1: #проверка рекламного поста
                     pass
                 else:
-                    try:
-                        if r['items'][s]['copy_history']: #проверка на репост
+                    if r['items'][count].get('copy_history'): #проверка на репост
                             pass
-                    except:
-                        postdate = r['items'][s]['date'] #время появления поста в unix. int
+                    else:
+                        postdate = r['items'][count]['date'] #время появления поста в unix. int
                         if postdate > readtime:
-                            sourceid = r['items'][s]['source_id'] #источник поста. int со знаком - вначале
+                            sourceid = r['items'][count]['source_id'] #источник поста. int со знаком - вначале
                             sourcename = '<u>' + groupsid[-sourceid] + '</u>' #имя группы. str
-                            posttext = sourcename + '\n' + crop_text(r['items'][s]['text']) #текст поста. str
-                            postid = r['items'][s]['post_id'] #id поста. int
+                            posttext = sourcename + '\n' + crop_text(r['items'][count]['text']) #текст поста. str
+                            postid = r['items'][count]['post_id'] #id поста. int
                             urlbutton = f'https://vk.com/feed?w=wall{sourceid}_{postid}' #ссылка на пост вк для кнопки. str
-                            attach = r['items'][s]['attachments'] #прикреплённые данные
+                            attach = r['items'][count]['attachments'] #прикреплённые данные
                             if attach == []:
                                 postobj = PostObj(posttext, urlbutton)
                                 log.log(31, 'Сформирован пост с текстом.')
@@ -130,15 +129,15 @@ def ask_vk():
                             else:
                                 if attach[0]['type'] == 'photo': #если тип фото
                                     urlphoto = ''
-                                    for p in attach[0]['photo']['sizes']:
-                                        if p['type'] == 'z':
-                                            urlphoto = p['url']
+                                    for photo in attach[0]['photo']['sizes']:
+                                        if photo['type'] == 'z':
+                                            urlphoto = photo['url']
                                             break
-                                        elif p['type'] == 'y':
-                                            urlphoto = p['url']
+                                        elif photo['type'] == 'y':
+                                            urlphoto = photo['url']
                                             break
-                                        elif p['type'] == 'x':
-                                            urlphoto = p['url']
+                                        elif photo['type'] == 'x':
+                                            urlphoto = photo['url']
                                             break
                                         else:
                                             urlphoto = errorphoto
