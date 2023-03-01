@@ -127,79 +127,76 @@ def ask_vk():
                                 log.log(31, 'Сформирован пост с текстом.')
                                 app.run(postobj.send_text_tg())
                             else:
-                                if attach[0]['type'] == 'photo': #если тип фото
-                                    urlphoto = ''
-                                    for photo in attach[0]['photo']['sizes']:
-                                        if photo['type'] == 'z':
-                                            urlphoto = photo['url']
-                                            break
-                                        elif photo['type'] == 'y':
-                                            urlphoto = photo['url']
-                                            break
-                                        elif photo['type'] == 'x':
-                                            urlphoto = photo['url']
-                                            break
+                                match attach[0]['type']:
+                                    case 'photo': #если тип фото
+                                        urlphoto = ''
+                                        for photo in attach[0]['photo']['sizes']:
+                                            if photo['type'] == 'z':
+                                                urlphoto = photo['url']
+                                                break
+                                            elif photo['type'] == 'y':
+                                                urlphoto = photo['url']
+                                                break
+                                            elif photo['type'] == 'x':
+                                                urlphoto = photo['url']
+                                                break
+                                            else:
+                                                urlphoto = errorphoto
+                                        postobj = PostObj(posttext, urlbutton, urlphoto)
+                                        log.log(31, 'Сформирован пост с текстом и фотографией.')
+                                        app.run(postobj.send_text_photo_tg())
+                                    case 'video': #если тип видео
+                                        idvideo = attach[0]['video']['id']
+                                        ownervideo = attach[0]['video']['owner_id']
+                                        posttext = f'{posttext}\nhttps://vk.com/video{ownervideo}_{idvideo}'
+                                        postobj = PostObj(posttext, urlbutton) #объект поста с текстом и ссылкой на видео
+                                        log.log(31, 'Сформирован пост с текстом и видео.')
+                                        app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
+                                    case 'link': #если тип ссылка
+                                        urllink = attach[0]['link']['url']
+                                        posttext = re.sub(r'http\S+', '', posttext)
+                                        posttext = f'{posttext}\n{urllink}'
+                                        postobj = PostObj(posttext, urlbutton) #объект поста с текстом и ссылкой
+                                        log.log(31, 'Сформирован пост с текстом и ссылкой.')
+                                        app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
+                                    case 'audio': #если тип аудио
+                                        posttext = f'{posttext}\n<i>Есть наличие аудиофайлов</i>'
+                                        postobj = PostObj(posttext, urlbutton) #объект поста с текстом и аудио
+                                        log.log(31, 'Сформирован пост с текстом и аудио.')
+                                        app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
+                                    case 'poll': #если тип опрос
+                                        question = attach[0]['poll']['question']
+                                        posttext = f'{posttext}\n<i>К посту прикреплён опрос:</i>\n{question}'
+                                        postobj = PostObj(posttext, urlbutton) #объект поста с текстом и опросом
+                                        log.log(31, 'Сформирован пост с текстом и опросом.')
+                                        app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
+                                    case 'doc': #если тип файл
+                                        exttype = attach[0]['doc']['ext']
+                                        urldoc = attach[0]['doc']['url']
+                                        if exttype == 'jpg':
+                                            postobj = PostObj(posttext, urlbutton, urldoc) #объект поста с текстом и фото
+                                            log.log(31, 'Сформирован пост с текстом и фотодокументом.')
+                                            app.run(postobj.send_text_photo_tg()) #объект поста отправляется в телеграм
+                                        elif exttype == 'gif':
+                                            postobj = PostObj(posttext, urlbutton, urldoc) #объект поста с текстом и гифкой
+                                            log.log(31, 'Сформирован пост с текстом и гифкой.')
+                                            app.run(postobj.send_text_anim_tg()) #объект поста отправляется в телеграм
+                                        elif exttype == 'doc':
+                                            posttext = f'{posttext}\n{urldoc}'
+                                            postobj = PostObj(posttext, urlbutton) #объект поста с текстом и документом
+                                            log.log(31, 'Сформирован пост с текстом и документом.')
+                                            app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
                                         else:
-                                            urlphoto = errorphoto
-                                    postobj = PostObj(posttext, urlbutton, urlphoto)
-                                    log.log(31, 'Сформирован пост с текстом и фотографией.')
-                                    app.run(postobj.send_text_photo_tg())
-                                elif attach[0]['type'] == 'video': #если тип видео
-                                    idvideo = attach[0]['video']['id']
-                                    ownervideo = attach[0]['video']['owner_id']
-                                    posttext = f'{posttext}\nhttps://vk.com/video{ownervideo}_{idvideo}'
-                                    postobj = PostObj(posttext, urlbutton) #объект поста с текстом и ссылкой на видео
-                                    log.log(31, 'Сформирован пост с текстом и видео.')
-                                    app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
-                                elif attach[0]['type'] == 'link': #если тип ссылка
-                                    urllink = attach[0]['link']['url']
-                                    posttext = re.sub(r'http\S+', '', posttext)
-                                    posttext = f'{posttext}\n{urllink}'
-                                    postobj = PostObj(posttext, urlbutton) #объект поста с текстом и ссылкой
-                                    log.log(31, 'Сформирован пост с текстом и ссылкой.')
-                                    app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
-                                elif attach[0]['type'] == 'audio': #если тип аудио
-                                    posttext = f'{posttext}\n<i>Есть наличие аудиофайлов</i>'
-                                    postobj = PostObj(posttext, urlbutton) #объект поста с текстом и аудио
-                                    log.log(31, 'Сформирован пост с текстом и аудио.')
-                                    app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
-                                elif attach[0]['type'] == 'poll': #если тип опрос
-                                    question = attach[0]['poll']['question']
-                                    posttext = f'{posttext}\n<i>К посту прикреплён опрос:</i>\n{question}'
-                                    postobj = PostObj(posttext, urlbutton) #объект поста с текстом и опросом
-                                    log.log(31, 'Сформирован пост с текстом и опросом.')
-                                    app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
-                                elif attach[0]['type'] == 'doc': #если тип файл
-                                    exttype = attach[0]['doc']['ext']
-                                    urldoc = attach[0]['doc']['url']
-                                    if exttype == 'jpg':
-                                        postobj = PostObj(posttext, urlbutton, urldoc) #объект поста с текстом и фото
-                                        log.log(31, 'Сформирован пост с текстом и фотодокументом.')
-                                        app.run(postobj.send_text_photo_tg()) #объект поста отправляется в телеграм
-                                    elif exttype == 'gif':
-                                        postobj = PostObj(posttext, urlbutton, urldoc) #объект поста с текстом и гифкой
-                                        log.log(31, 'Сформирован пост с текстом и гифкой.')
-                                        app.run(postobj.send_text_anim_tg()) #объект поста отправляется в телеграм
-                                    elif exttype == 'doc':
-                                        posttext = f'{posttext}\n{urldoc}'
-                                        postobj = PostObj(posttext, urlbutton) #объект поста с текстом и документом
-                                        log.log(31, 'Сформирован пост с текстом и документом.')
+                                            postobj = PostObj(posttext, urlbutton) #объект поста с текстом и файлом
+                                            log.log(31, 'Сформирован пост с текстом и файлом.')
+                                            app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
+                                    case _:
+                                        postobj = PostObj(posttext, urlbutton) #объект поста с текстом и другими данными
+                                        log.log(31, 'Сформирован пост с текстом и другими данными.')
                                         app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
-                                    else:
-                                        postobj = PostObj(posttext, urlbutton) #объект поста с текстом и файлом
-                                        log.log(31, 'Сформирован пост с текстом и файлом.')
-                                        app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
-                                else:
-                                    postobj = PostObj(posttext, urlbutton) #объект поста с текстом и другими данными
-                                    log.log(31, 'Сформирован пост с текстом и другими данными.')
-                                    app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
-                        else:
-                            pass
 
             if r['items'][0]['date'] > readtime:
                 writefiledate(r['items'][0]['date']) #записываем время свежего поста в datesave файл
-            else:
-                pass
         else:
             log.log(31, 'Пришёл пустой запрос от Вконтакте.')
             pass
