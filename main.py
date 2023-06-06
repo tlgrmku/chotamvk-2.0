@@ -13,7 +13,6 @@ timeout = config.timeout
 countpost = config.countpost
 tgchatid = config.tgchatid
 adminchat = config.adminchat
-nameclient = config.nameclient
 token= config.token
 DATESAVE = config.DATESAVE
 LOGF = config.LOGF
@@ -26,13 +25,13 @@ logging.basicConfig(level=logging.WARNING, filename=LOGF, format=FORMAT)
 log = logging.getLogger()
 
 #Строки api_id, api_hash, bot_token, app=... нужны для первого запуска бота. Затем эти строки можно удалить.
-#api_id = 12345
-#api_hash = "0123456789abcdef0123456789abcdef"
-#bot_token = "123456:ABc-DEF1234ghIkl-zyx57W2v1u123ew11"
-#app = Client(nameclient, api_id=api_id, api_hash=api_hash, bot_token=bot_token)
+api_id = 12345
+api_hash = "0123456789abcdef0123456789abcdef"
+bot_token = "123456:ABc-DEF1234ghIkl-zyx57W2v1u123ew11"
+app = Client('nameclient', api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
-#После удаления раскоментировать строку ниже.
-app = Client(nameclient)
+#После удаления раскоментировать строку ниже. Имя клиента можно изменить.
+#app = Client('nameclient')
 
 
 class PostObj: #объект поста из вк
