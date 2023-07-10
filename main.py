@@ -87,7 +87,7 @@ def readfiledate(): #чтение файла с датой последнего 
 
 def writefiledate(date): #запись файла с датой последнего поста
     with open(DATESAVE, 'w', encoding='UTF-8') as f:
-            f.write(str(date + 1))
+            f.write(str(date))
 
 def crop_text(text): #обрезает длинный текст поста (более 800 символов)
     if len(text) > 800:
@@ -115,6 +115,7 @@ def ask_vk():
                     else:
                         postdate = r['items'][count]['date'] #время появления поста в unix. int
                         if postdate > readtime:
+                            writefiledate(r['items'][0]['date']) #записываем время свежего поста в datesave файл
                             sourceid = r['items'][count]['source_id'] #источник поста. int со знаком - вначале
                             sourcename = '<u>' + groupsid[-sourceid] + '</u>' #имя группы. str
                             posttext = sourcename + '\n' + crop_text(r['items'][count]['text']) #текст поста. str
@@ -194,8 +195,6 @@ def ask_vk():
                                         log.log(31, 'Сформирован пост с текстом и другими данными.')
                                         app.run(postobj.send_text_tg()) #объект поста отправляется в телеграм
 
-            if r['items'][0]['date'] > readtime:
-                writefiledate(r['items'][0]['date']) #записываем время свежего поста в datesave файл
         else:
             log.log(31, 'Пришёл пустой запрос от Вконтакте.')
             pass
